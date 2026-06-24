@@ -13,28 +13,56 @@
 
   * { box-sizing: border-box; }
 
-  body {
+  html, body {
     margin: 0;
+    height: 100%;
     background: var(--bg-dark);
     font-family: 'Segoe UI', Tahoma, sans-serif;
+    overflow: hidden;
+  }
+
+  .page {
+    height: 100vh;
+    height: 100dvh;
+    width: 100vw;
     display: flex;
+    flex-direction: column;
+    align-items: center;
     justify-content: center;
-    padding: 20px 0 60px;
+    padding: clamp(10px, 2vh, 20px) 12px;
+    overflow: hidden;
+    gap: clamp(8px, 1.5vh, 14px);
+  }
+
+  .title-bar {
+    flex: 0 0 auto;
   }
 
   .map-wrap {
     position: relative;
-    width: 100%;
-    max-width: 560px;
-    margin: 0 auto;
+    flex: 0 1 auto;
+    max-width: 100%;
+    max-height: 100%;
+    min-height: 0;
+    min-width: 0;
+    width: fit-content;
+    height: fit-content;
+    display: flex;
   }
 
   .map-wrap img {
     display: block;
-    width: 100%;
+    height: auto;
+    width: auto;
+    max-width: 100%;
+    max-height: 100%;
     border-radius: 8px;
     user-select: none;
     -webkit-user-drag: none;
+  }
+
+  .hint {
+    flex: 0 0 auto;
   }
 
   .marker {
@@ -207,8 +235,7 @@
     text-align: center;
     color: var(--orange);
     font-weight: 900;
-    font-size: 1.6rem;
-    margin-bottom: 14px;
+    font-size: clamp(1.1rem, 4vh, 1.6rem);
     letter-spacing: 1px;
     text-shadow: 0 0 12px rgba(255,140,26,0.4);
   }
@@ -217,21 +244,20 @@
     text-align: center;
     color: #aaa;
     font-size: 0.85rem;
-    margin-top: 14px;
     font-style: italic;
   }
 </style>
 </head>
 <body>
 
-<div style="max-width:560px; width:100%;">
+<div class="page">
   <div class="title-bar">🗺️ Trajan Comics Map</div>
 
   <div class="map-wrap">
     <img src="trajan-map.jpg" alt="Mappa evento Trajan Comics">
 
     <!-- Marker: Trucco e parrucco (rosa) -->
-    <div class="marker pulse" style="left:34.3%; top:18.5%; background:#ff3fb0; color:#ff3fb0;"
+    <div class="marker pulse" style="left:34.3%; top:18.5%;; background:#ff3fb0; color:#ff3fb0;"
          tabindex="0" role="button" aria-label="Trucco e parrucco"
          data-title="💄 Trucco e parrucco"
          data-color="#ff3fb0"
@@ -255,7 +281,7 @@
          data-links='[{"label":"📷 Instagram","url":"https://www.instagram.com/furorenormannorumcanosa/"}]'>
     </div>
 
-    <!-- Marker: Stand Manbaga (rosso) -->
+    <!-- Marker: Stand Manbaga (rosso) - Modificato con l'immagine personalizzata nel popup -->
     <div class="marker pulse" style="left:55.6%; top:24.0%; background:#e62b2b; color:#e62b2b;"
          tabindex="0" role="button" aria-label="Stand Manbaga"
          data-title="Stand Manbaga"
@@ -271,7 +297,7 @@
          data-title="Fai Da Tela"
          data-color="#ff9a1f"
          data-image="image1.png"
-         data-body="Stand a tema artistico/tattoo: vieni a scoprire le creazioni a tema manga e anime di Fai Da Tela. Segui la pagina Instagram per maggiori dettagli su cosa trovare allo stand!"
+         data-body="Stand a tema artistico/tattoo: vieni a scoprire le creazioni a tema manga e anime di Fai Da Tela. Seguili su Instagram per maggiori dettagli su cosa trovare allo stand!"
          data-links='[{"label":"📷 Instagram","url":"https://www.instagram.com/fai.da.tela_tattoo/"}]'>
     </div>
 
@@ -280,8 +306,7 @@
          tabindex="0" role="button" aria-label="Panificio Traiano"
          data-title="🍞 Panificio Traiano"
          data-color="#ff8c1a"
-         data-body="Punto ristoro dell'evento: panini, focacce e bevande per ricaricarti tra una postazione e l'altra.<br><br><strong>Aggiungi qui orari e dettagli specifici.</strong>"
-         data-links='[{"label":"📷 Instagram","url":"https://www.instagram.com/panificiotraiano/"}]'>
+         data-body="Punto ristoro dell'evento: panini, focacce e bevande per ricaricarti tra una postazione e l'altra.<br><br><strong>Aggiungi qui orari e dettagli specifici.</strong>">
     </div>
 
   </div>
@@ -312,11 +337,23 @@
     const body = marker.getAttribute('data-body');
     const color = marker.getAttribute('data-color');
     const linksAttr = marker.getAttribute('data-links');
+    const imageAttr = marker.getAttribute('data-image');
 
     popupTitle.textContent = title;
     popupHeader.style.background = color;
 
-    let html = `<p>${body}</p>`;
+    let html = '';
+
+    // Se è presente un'immagine personalizzata per il popup (come per Manbaga), la renderizziamo in cima
+    if (imageAttr) {
+      html += `
+        <div style="display: flex; justify-content: center; width: 100%; margin-bottom: 16px;">
+          <img src="${imageAttr}" alt="${title}" style="max-width: 100%; max-height: 250px; height: auto; border-radius: 8px; object-fit: contain; box-shadow: 0 4px 12px rgba(0,0,0,0.15);" onerror="this.style.display='none'">
+        </div>
+      `;
+    }
+
+    html += `<p>${body}</p>`;
 
     if (linksAttr) {
       try {
